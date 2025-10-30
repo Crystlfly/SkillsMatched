@@ -39,7 +39,7 @@ export default function Navbar() {
         const decoded = jwtDecode<MyJwtPayload>(token);
         setUser(decoded);
 
-        const res = await fetch("http://localhost:5000/profile", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

@@ -26,7 +26,7 @@ export default function JobDetailsPage() {
   useEffect(()=>{
     const fetchDetails = async()=>{
       try{
-        const res=await fetch("http://localhost:5000/jobs/"+jobIdNum);
+        const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/${jobIdNum}`);
         const data = await res.json();
         setDetails(data);
       }

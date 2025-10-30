@@ -18,7 +18,7 @@ export default function ViewJobModal({isOpen, onCloseAction, job}:{
         
         const fetchJobDetails =async()=>{
             try{
-                const res=await fetch("http://localhost:5000/jobs/"+job);
+                const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/${job}`);
                 const data=await res.json();
                 setJobDetails(data);
 

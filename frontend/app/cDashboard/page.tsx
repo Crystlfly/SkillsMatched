@@ -37,7 +37,7 @@ export default function CandidateDashboard() {
       const decoded = jwtDecode<MyJwtPayload>(token);
       setUser(decoded);
 
-      fetch("http://localhost:5000/profile", {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -48,7 +48,7 @@ export default function CandidateDashboard() {
           console.log("Profile data:", data);
         });
 
-      fetch("http://localhost:5000/applications/candidate/" + decoded.userId, {
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/candidate/${decoded.userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

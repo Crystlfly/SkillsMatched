@@ -32,7 +32,7 @@ export default function RecuiterDashboard() {
     const decoded = jwtDecode<MyJwtPayload>(token);
 
     // Fetch all jobs for this recruiter
-    fetch("http://localhost:5000/jobs/recruiter/" + 1, {
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/recruiter/${1}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -46,7 +46,7 @@ export default function RecuiterDashboard() {
         for (const job of jobs) {
           try {
             const res = await fetch(
-              `http://localhost:5000/applications/job/${job.id}`,
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/job/${job.id}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }

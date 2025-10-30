@@ -62,7 +62,7 @@ export default function ApplicationModal({ isOpen, onCloseAction, jobId, jobTitl
       formData.append("coverLetter", coverLetter);
       formData.append("reason", reason);
 
-      const response = await fetch("http://localhost:5000/upload/upload", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload/upload`, {
         method: "POST",
         body: formData, 
       });

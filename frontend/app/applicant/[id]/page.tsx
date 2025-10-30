@@ -27,7 +27,7 @@ export default function applicants(){
             return;
             }
             const decoded = jwtDecode<MyJwtPayload>(token);
-            const res=await fetch("http://localhost:5000/applications/job/" + jobId, {
+            const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/job/${jobId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -41,7 +41,7 @@ export default function applicants(){
     };
     useEffect(() => {
         refreshApplications();
-    },[]);
+    },[jobId]);
 
     return(
         <div className="bg-gray-100/50 min-h-screen dark:bg-gray-900">

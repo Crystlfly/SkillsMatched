@@ -35,7 +35,7 @@ export default function JobsPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/jobs/search?${query.toString()}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/search?${query.toString()}`
       );
       const data = await res.json();
       setResults(data);
@@ -47,7 +47,7 @@ export default function JobsPage() {
   useEffect(() => {
     async function loadJobs() {
       try {
-        const res = await fetch("http://localhost:5000/jobs");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`);
         const data = await res.json();
         setJobs(data);
       } catch (error) {

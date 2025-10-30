@@ -29,7 +29,7 @@ export default function CandidateProfile({
   const handleSubmit = async (status: string) => {
     try {
       const res = await fetch(
-        `http://localhost:5000/applications/${status}/${applicant.candidateId}/${applicant.jobId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/${status}/${applicant.candidateId}/${applicant.jobId}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
