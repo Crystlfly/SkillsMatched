@@ -11,10 +11,19 @@ model User {
   id           Int    @id @default(autoincrement())
   name         String
   email        String @unique
-  password     String
-  role         Role
+  password     String?
+  role         Role @default(CANDIDATE)
+  phone        String?
+  location     String?
+  bio          String?
+  linkedIn_URL String?
+  gitHub_URL   String?
+  portfolio_URL String?
+  profilePicUrl String?
+  googleId     String? @unique
   jobs         Job[]  @relation("RecruiterJobs")
   applications Application[] 
+  JobPreference JobPreference?
 }
 
 model Job {
@@ -32,6 +41,8 @@ model Job {
   benefits     String[] @default([])
   recruiter    User     @relation("RecruiterJobs", fields: [recruiterId], references: [id])
   recruiterId  Int
+  embedding    Float[]  @default([])
+  jobStatus    JobStatus? @default(ACTIVE)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   applications Application[]
@@ -54,6 +65,21 @@ model Application {
   @@unique([candidateId, jobId])
 }
 
+model JobPreference{
+  id Int @id @default(autoincrement())
+  candi    User @relation(fields: [candiId],references: [id])
+  candiId      Int      @unique 
+  title        String
+  location     String
+  type         JobType  @default(FullTime)
+  salary       Int?
+  skills       String[]
+  resumeUrl     String   // optional
+  embedding    Float[]  @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 enum Role {
   CANDIDATE
   RECRUITER
@@ -73,4 +99,9 @@ enum JobType{
   PartTime
   Contract
   Internship
+}
+
+enum JobStatus{
+  ACTIVE
+  DEACTIVATED
 }

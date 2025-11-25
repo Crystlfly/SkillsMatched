@@ -9,6 +9,10 @@ import profileRoutes from "./routes/profile.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import resumeUpload from "./routes/upload.js";
+import recommendationRoutes from "./routes/recommendation.js";
+import testEmailRoute from "./routes/testEmail.js";
+import "./cron/weeklyJobMailer.js";
+
 
 const prisma = new PrismaClient();
 
@@ -36,5 +40,7 @@ app.use("/profile", profileRoutes);
 app.use("/jobs", jobRoutes);
 app.use("/applications", applicationRoutes);
 app.use("/upload", resumeUpload);
+app.use("/recommend",recommendationRoutes);
+app.use("/test", testEmailRoute);
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

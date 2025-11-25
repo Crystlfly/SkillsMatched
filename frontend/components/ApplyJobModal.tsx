@@ -117,10 +117,10 @@ export default function ApplicationModal({ isOpen, onCloseAction, jobId, jobTitl
           </div>
           <div>
             <label className="block font-medium mb-1 text-sm">Resume *</label>
-            <label className="border border-dashed border-gray-400 p-4 rounded mb-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50">
+            <label className="border border-dashed border-gray-400 p-4 rounded mb-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600">
               <Plus className="mb-2" />
-              <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-500 mt-1">Supported formats: PDF, DOCX. Max size: 5MB</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
+              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Supported formats: PDF, DOCX. Max size: 5MB</p>
               <input
                 id="resume"
                 type="file"
@@ -162,7 +162,7 @@ export default function ApplicationModal({ isOpen, onCloseAction, jobId, jobTitl
             className="w-full border p-2 rounded mb-4 placeholder:text-[12px]"
           />
           <div className="mb-4 border">
-            <p className="p-2 text-[10px] flex items-center justify-between text-gray-600">
+            <p className="p-2 text-[10px] flex items-center justify-between text-gray-600 dark:text-gray-400">
               By submitting this application, you agree to our Terms of Service and Privacy Policy. We'll
 only use your information for recruitment purposes.
             </p>

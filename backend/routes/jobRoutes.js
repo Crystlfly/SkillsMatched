@@ -1,5 +1,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
+import { authMiddleware } from "../middleware/auth.js";
+import { getEmbedding } from '../bert_setup.js';
 
 const router = express.Router();
 const prisma = globalThis.prisma || new PrismaClient();
@@ -15,6 +17,20 @@ router.post("/", async (req, res) => {
     if (!title || !description || !company || !location || !recruiterId) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+    const jobText = `
+      Title: ${title}
+      Company: ${company}
+      Location: ${location}
+      Type: ${type}
+      Salary: ${salary}
+      Skills: ${Array.isArray(skills) ? skills.join(", ") : skills}
+      Description: ${description}
+      Responsibilities: ${respnsblts.join(", ")}
+      Requirements: ${requirements.join(", ")}
+      Benefits: ${benefits.join(", ")}
+      About the Company: ${about}
+    `;
+    const embedding = await getEmbedding(jobText);
 
     const job = await prisma.job.create({
       data: {
@@ -30,6 +46,7 @@ router.post("/", async (req, res) => {
         requirements,
         benefits,
         recruiterId,
+        embedding:embedding,
       },
     });
 
@@ -39,6 +56,23 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
+router.post("/updateStatus", authMiddleware, async (req,res)=>{
+  try{
+    const {jobId,status}=req.body;
+    const data=await prisma.job.update({
+      where:{
+        id:parseInt(jobId)
+      },
+      data:{jobStatus:status}
+    });
+    res.status(200).json({ message: "Job status updated successfully", data });
+  }
+  catch(error){
+    res.status(500).json({message:"Error updating job status."})
+  }
+})
+
 
 // GET /jobs/recruiter/:id -> fetch jobs posted by a recruiter
 router.get("/recruiter/:id", async (req, res) => {

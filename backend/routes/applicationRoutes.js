@@ -28,7 +28,6 @@ router.get("/job/:id", async (req, res) => {
       return res.status(400).json({ message: "Invalid job ID" });
     }
 
-    // Fetch all applications for that job along with candidate details
     const applications = await prisma.application.findMany({
       where: {
         jobId: jobId,

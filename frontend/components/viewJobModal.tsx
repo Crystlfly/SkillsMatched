@@ -14,6 +14,7 @@ export default function ViewJobModal({isOpen, onCloseAction, job}:{
     job:string
 }){
     const [jobDetails, setJobDetails]=useState<any>(null);
+
     useEffect(() =>{
         
         const fetchJobDetails =async()=>{
@@ -28,6 +29,35 @@ export default function ViewJobModal({isOpen, onCloseAction, job}:{
         }
         if(job) fetchJobDetails ();
     },[job]);
+
+    const toggleJobStatus=async()=>{
+        try{
+            const res= await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs/updateStatus`,{
+                method:"POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // If authMiddleware checks token, include this:
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body:JSON.stringify({
+                    jobId:jobDetails.id,
+                    status:"DEACTIVATED",
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+      alert("Job deactivated successfully!");
+      setJobDetails({ ...jobDetails, status: "DEACTIVATED" });
+      onCloseAction(); // optional: close modal after success
+    } else {
+      alert(data.message || "Failed to deactivate job.");
+    }
+        }
+        catch(error){
+            console.log("Error Updating Job Status");
+        }
+        
+    }
 
     if(!isOpen) return null;
     if(!jobDetails) return <p>Loading job details...</p>;
@@ -135,7 +165,9 @@ export default function ViewJobModal({isOpen, onCloseAction, job}:{
                 </div>
 
                 <div className="flex gap-3 mt-5">
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">
+                    <button 
+                    onClick={toggleJobStatus}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">
                         Deactivate Job
                     </button>
                     <button

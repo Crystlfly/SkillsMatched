@@ -19,5 +19,5 @@ export function timeAgo(dateString) {
     }
   }
 
-  return "Applied just now";
+  return " Just now";
 }

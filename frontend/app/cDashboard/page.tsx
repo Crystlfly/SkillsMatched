@@ -2,6 +2,7 @@
 "use client";
 import { Progress } from "@/components/ui/progress"; // if you have shadcn/ui
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 import { IoDocumentTextOutline, IoBookmarkOutline, IoTrendingUpSharp, IoCalendarOutline } from "react-icons/io5";
 import { FaRegEdit } from "react-icons/fa";
 import { IoMdSearch } from "react-icons/io";
@@ -10,11 +11,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { timeAgo } from "@/lib/timeAgo";
+import { BiSolidRightArrow } from "react-icons/bi";
+import ProfileModal from "@/components/profileModal";
 
 
 interface MyJwtPayload extends JwtPayload {
   userId: string;
-  // email: string;
   role: string;
 }
 
@@ -25,6 +27,17 @@ export default function CandidateDashboard() {
   const [user, setUser] = useState<MyJwtPayload | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [applications, setApplications] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>([])
+  const [isOpen, setIsOpen]=useState(false);
+
+  const router=useRouter();
+
+  const getInitials = (fullName?: string) => {
+    if (!fullName) return "";
+    const parts = fullName.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return parts[0][0].toUpperCase() + parts[parts.length - 1][0].toUpperCase();
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -56,6 +69,14 @@ export default function CandidateDashboard() {
       .then((res)=>res.json())
       .then((data)=>setApplications(data));
 
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res)=>res.json())
+      .then((data)=>setStats(data));
+
     } catch (err) {
       console.error("Invalid token", err);
       localStorage.removeItem("token");
@@ -64,10 +85,10 @@ export default function CandidateDashboard() {
   }, []);
 
   const iconData = [
-    { title: "Applied Jobs", value: applications?.length, icon: IoDocumentTextOutline, color: "text-blue-600", bgColor: "bg-blue-100" },
-    { title: "Saved Jobs", value: 8, icon: IoBookmarkOutline, color: "text-green-500", bgColor: "bg-green-100" },
-    { title: "Profile Views", value: 34, icon: IoTrendingUpSharp, color: "text-purple-500", bgColor: "bg-purple-100" },
-    { title: "Interviews", value: 3, icon: IoCalendarOutline, color: "text-red-500", bgColor: "bg-red-100" },
+    { title: "Applied Jobs", value: stats.applicationsCount, icon: IoDocumentTextOutline, color: "text-blue-600", bgColor: "bg-blue-100" },
+    { title: "Offers Recieved", value: stats.offersCount, icon: IoTrendingUpSharp, color: "text-green-500", bgColor: "bg-green-100" },
+    // { title: "Profile Views", value: 34, icon: IoTrendingUpSharp, color: "text-purple-500", bgColor: "bg-purple-100" },
+    { title: "Interviews", value: stats.interviewsCount, icon: IoCalendarOutline, color: "text-red-500", bgColor: "bg-red-100" },
   ];
 
 
@@ -76,14 +97,17 @@ export default function CandidateDashboard() {
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
   }
 
+  const handleViewMore=()=>{
+    router.push(`/my-application`);
 
+  }
 
 
   if (!user) return <p>Loading...</p>;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-x-hidden">
 
-  <div className="flex justify-between items-center px-20 py-6">
+  <div className="flex flex-col md:flex-row justify-between items-center px-4 md:px-10 lg:px-20 py-6">
     <section className="mt-6">
       <h2 className="text-2xl font-bold">Welcome back, {profile?.name}!</h2>
       <p className="text-gray-500 dark:text-gray-400">
@@ -100,7 +124,7 @@ export default function CandidateDashboard() {
   </div>
 
   {/* Quick Stats */}
-  <section className="grid grid-cols-4 gap-4 mt-6 px-20">
+  <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 px-4 md:px-10 lg:px-20">
     {iconData.map((item, idx) => {
       const Icon = item.icon;
       return (
@@ -121,9 +145,9 @@ export default function CandidateDashboard() {
   </section>
 
   {/* Main Content */}
-  <section className="grid grid-cols-2 gap-6 mt-6 px-20 py-15">
+  <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-4 md:px-10 lg:px-20 py-15">
     {/* Profile Overview */}
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-300">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-300 w-full">
             <div className="flex items-center gap-2 mb-6">
             <GoPerson className="text-xl text-gray-700 dark:text-gray-100" />
             <h3 className="font-semibold text-lg">Profile Overview</h3>
@@ -131,37 +155,78 @@ export default function CandidateDashboard() {
 
           
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">SJ</div>
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
+              {getInitials(profile?.name)}
+            </div>
             <div>
               <p className="font-semibold">{profile?.name}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{formatRole(profile?.role)}</p>
               {/* <p className="text-xs text-gray-400">San Francisco, CA</p> */}
             </div>
           </div>
-          <div className="mt-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Profile Completion</p>
-            <Progress value={85} className="mt-2 h-2 rounded-full" />
-            </div>
+          <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            {profile?.email && (
+              <p><span className="font-semibold text-gray-800 dark:text-gray-100">Email:</span> {profile.email}</p>
+            )}
+            {profile?.phone && (
+              <p><span className="font-semibold text-gray-800 dark:text-gray-100">Phone:</span> {profile.phone}</p>
+            )}
+            {profile?.location && (
+              <p><span className="font-semibold text-gray-800 dark:text-gray-100">Location:</span> {profile.location}</p>
+            )}
+            {profile?.Bio && (
+              <p><span className="font-semibold text-gray-800 dark:text-gray-100">Bio:</span> {profile.bio}</p>
+            )}
+          </div>
 
-          <div className="mt-4 flex gap-2">
-            <Badge variant="secondary">React</Badge>
-            <Badge variant="secondary">TypeScript</Badge>
-            <Badge variant="secondary">JavaScript</Badge>
-            </div>
-            
-          <button className="mt-4 w-full rounded-md text-sm border border-gray-300 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:border-white/30 dark:hover:bg-gray-700 flex items-center justify-center gap-2 px-3 py-2">
-  <FaRegEdit className="text-black dark:text-gray-100" />
-  Edit Profile
-</button>
+          {/* Social Links */}
+          <div className="mt-4 space-y-1">
+            {profile?.linkedIn_URL && (
+              <a
+                href={profile.linkedIn_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-blue-600 hover:underline"
+              >
+                LinkedIn Profile
+              </a>
+            )}
+            {profile?.gitHub_URL && (
+              <a
+                href={profile.gitHub_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-gray-700 dark:text-gray-200 hover:underline"
+              >
+                GitHub Profile
+              </a>
+            )}
+            {profile?.portfolio_URL && (
+              <a
+                href={profile.portfolio_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-purple-600 hover:underline"
+              >
+                Portfolio
+              </a>
+            )}
+          </div>
 
-
+          {/* Edit Button */}
+          <button 
+            onClick={()=>setIsOpen(true)}
+            className="mt-5 w-full rounded-md text-sm border border-gray-300 bg-white hover:bg-gray-100 dark:bg-gray-800 dark:border-white/30 dark:hover:bg-gray-700 flex items-center justify-center gap-2 px-3 py-2">
+            <FaRegEdit className="text-black dark:text-gray-100" />
+            Edit Profile
+          </button>
         </div>
 
     {/* Recent Activity */}
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-300">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 transition-colors duration-300 w-full">
       <h3 className="font-semibold mb-4">Recent Activity</h3>
       <ul className="space-y-4">
-        {applications.map((application) => (
+        {applications.slice(0,3).map((application) => (
           <li
             key={application.id}
             className="flex justify-between items-center bg-gray-100/50 dark:bg-gray-700/50 p-4 rounded-lg transition-colors duration-300"
@@ -182,13 +247,26 @@ export default function CandidateDashboard() {
               }`}>
                 {application.status}
               </span>
-              <p className="text-xs text-gray-400 dark:text-gray-300">Applied: {timeAgo(application.appliedAt)}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-300 mt-2">Applied: {timeAgo(application.appliedAt)}</p>
             </div>
           </li>
         ))}
       </ul>
+      <button
+      onClick={handleViewMore}
+      className="mt-4 inline-flex items-center gap-1 
+        bg-gray-200/50 dark:bg-gray-700 
+        text-gray-600 dark:text-gray-200 text-sm
+        p-2 rounded-lg 
+        hover:bg-gray-200 dark:hover:bg-gray-600 
+        transition-colors duration-300"
+    >
+      View More
+      <BiSolidRightArrow className="text-gray-500/70 dark:text-gray-200" />
+    </button>
     </div>
   </section>
+  <ProfileModal isOpen={isOpen} onCloseAction={()=> setIsOpen(false)}/>
 </div>
 
   );

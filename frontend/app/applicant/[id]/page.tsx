@@ -13,7 +13,7 @@ interface MyJwtPayload extends JwtPayload {
   userId: string;
   role: string;
 }
-export default function applicants(){
+export default function Applicants(){
     const [open, setOpen] = useState(false);
     const params = useParams();
     const jobId = params.id;

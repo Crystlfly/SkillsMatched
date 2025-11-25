@@ -4,6 +4,7 @@ import "./globals.css";
 import Head from 'next/head'
 import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/Navbar";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 
 const geistSans = Geist({
@@ -37,9 +38,11 @@ export default function RootLayout({
         
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={true}>
           <Navbar/>
-          <main className="min-h-screen bg-white dark:bg-black transition-colors duration-300">
-          {children}
-          </main>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+            <main className="min-h-screen bg-white dark:bg-black transition-colors duration-300">
+            {children}
+            </main>
+          </GoogleOAuthProvider>
         </ThemeProvider>
         
       </body>

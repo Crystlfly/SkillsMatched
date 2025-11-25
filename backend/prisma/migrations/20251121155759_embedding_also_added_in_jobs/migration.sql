@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."Job" ADD COLUMN     "embedding" DOUBLE PRECISION[] DEFAULT ARRAY[]::DOUBLE PRECISION[];

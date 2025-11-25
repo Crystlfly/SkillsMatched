@@ -30,6 +30,17 @@ export default function PostJobModal({
   const [benefits, setBenefits] = useState<string[]>([]);
   const [newBenefit, setNewBenefit] = useState("");
 
+  const defaultFormState = {
+    title: "",
+    description: "",
+    company: "",
+    location: "",
+    type: "FullTime",
+    about: "",
+    salary: "",
+  };
+
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -38,7 +49,6 @@ export default function PostJobModal({
     type: "FullTime",
     about: "",
     salary: "",
-    
   });
 
   const addSkill = () => {
@@ -85,6 +95,19 @@ export default function PostJobModal({
       [e.target.name]: e.target.value,
     });
   };
+
+  const resetForm = () => {
+    setFormData(defaultFormState);
+    setSkills([]);
+    setNewSkill("");
+    setResponsibilities([]);
+    setNewResponsibilities("");
+    setRequirements([]);
+    setNewRequirement("");
+    setBenefits([]);
+    setNewBenefit("");
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     const token = localStorage.getItem("token");
@@ -376,8 +399,9 @@ export default function PostJobModal({
       <p className="mb-6 test-gray-800 dark:text-white/70">Your job has been successfully posted.</p>
       <button
         onClick={() => {
+          resetForm();
           setShowSuccess(false);
-          onCloseAction(); // close the PostJobModal too
+          onCloseAction(); 
         }}
         className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90"
       >
