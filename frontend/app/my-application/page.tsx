@@ -19,14 +19,13 @@ export default function MyApplications() {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
 
-  const token=localStorage.getItem("token");
-  if (!token) {
-    return <div className="text-center py-16">Please log in to view your applications.</div>;
-  }
-  const decoded=jwtDecode<MyJwtPayload>(token);
-
   useEffect(() => {
   async function loadApplications(){
+    const token=localStorage.getItem("token");
+    if (!token) {
+      return <div className="text-center py-16">Please log in to view your applications.</div>;
+    }
+    const decoded=jwtDecode<MyJwtPayload>(token);
     try{
       const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/candidate/${decoded.userId}`);
       const data=await res.json();
