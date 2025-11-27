@@ -218,8 +218,26 @@ export default function CandidateJobPreference({
           <div>
             <label className="border border-dashed border-gray-400 p-4 rounded mb-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600">
               <Plus className="mb-2" />
-              <p className="text-sm text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
-              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Supported formats: PDF, DOCX. Max size: 5MB</p>
+              {file ? (
+      <>
+        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+          {file.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  PDF, DOC, DOCX (Max 5MB)
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                  Supported formats: PDF, DOCX. Max size: 5MB
+                </p>
+              </>
+            )
+          }
               <input
                 id="resume"
                 type="file"
