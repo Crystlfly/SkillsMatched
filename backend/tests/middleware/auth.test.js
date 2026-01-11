@@ -34,13 +34,11 @@ describe("authMiddleware",()=>{
     });
 
     test("should return 403 if token is invalid or expired", () => {
-        // We sign a token with a DIFFERENT secret to make verification fail
+        // signed a token with a DIFFERENT secret to make verification fail
         const invalidToken = jwt.sign({ userId: "123" }, "WRONG_SECRET");
         req.headers["authorization"] = `Bearer ${invalidToken}`;
 
         authMiddleware(req, res, next);
-
-        // This triggers the 'catch' block (Line 15)
         expect(res.status).toHaveBeenCalledWith(403);
         expect(res.json).toHaveBeenCalledWith({ message: "Invalid or expired token" });
         expect(next).not.toHaveBeenCalled();
