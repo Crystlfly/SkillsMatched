@@ -1,6 +1,11 @@
 import redis from "../redis.js";
 import {authMiddleware} from "../middleware/auth.js";
+import {PrismaClient} from "@prisma/client";
 import express from "express";
+const prisma = globalThis.prisma || new PrismaClient();
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma; 
+}
 
 const router=express.Router();
 
