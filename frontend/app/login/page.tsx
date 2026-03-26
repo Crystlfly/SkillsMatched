@@ -103,8 +103,8 @@ export default function LoginPage() {
       <div className="absolute top-[4rem] lg:top-[2.5rem] left-1/2 -translate-x-1/2 
   lg:left-[calc(50%-13.5rem)] lg:translate-x-0
                 text-gray-900 dark:text-gray-200 underline">
-        <a href="/" className="text-purple-900 dark:text-purple-100 underline ">
-          Back to Home
+        <a href="/signup" className="text-purple-900 dark:text-purple-100 underline ">
+          Go to Signup
         </a>
       </div>
       
