@@ -1,26 +1,30 @@
 "use client";
-import {useState} from "react"
-import { X, Upload  } from "lucide-react";
+import { useState } from "react";
+import { X, Upload } from "lucide-react";
 
 export default function ProfileModal({
   isOpen,
   onCloseAction,
+  onSaveSuccess,
 }: {
   isOpen: boolean;
   onCloseAction: () => void;
+  onSaveSuccess?: () => void;
 }) {
-    const [formData, setFormData]=useState({
-        name:"",
-        email:"",
-        phone:"",
-        location:"",
-        Bio:"",
-        linkedIn_URL:"",
-        gitHub_URL:"",
-        portfolio_URL:"",
-
-    })
-      const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    location: "",
+    Bio: "",
+    linkedIn_URL: "",
+    gitHub_URL: "",
+    portfolio_URL: "",
+  });
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  
+  // ADDED: State to track custom error messages
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -31,6 +35,32 @@ export default function ProfileModal({
   };
 
   const handleSave = async () => {
+    // Reset error message on new save attempt
+    setErrorMsg(null);
+
+    // 1. FRONTEND VALIDATION
+    const missingFields = [];
+    if (!formData.name.trim()) missingFields.push("Full Name");
+    if (!formData.email.trim()) missingFields.push("Email");
+    if (!formData.location.trim()) missingFields.push("Location");
+    if (!formData.linkedIn_URL.trim()) missingFields.push("LinkedIn URL");
+    if (!formData.gitHub_URL.trim()) missingFields.push("GitHub URL");
+    if (!formData.portfolio_URL.trim()) missingFields.push("Portfolio URL");
+    
+    // Check if an image is selected (either previously set or just uploaded)
+    const fileInput = document.getElementById("profileImage") as HTMLInputElement;
+    const hasNewFile = fileInput && fileInput.files && fileInput.files.length > 0;
+    if (!profileImage && !hasNewFile) {
+      missingFields.push("Profile Photo");
+    }
+
+    if (missingFields.length > 0) {
+      // CHANGED: Use custom state instead of alert()
+      setErrorMsg(`Please fill in the following required fields: ${missingFields.join(", ")}`);
+      return; // Stop the save process here!
+    }
+
+    // 2. PROCEED WITH SAVING
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No auth token found.");
@@ -44,33 +74,40 @@ export default function ProfileModal({
       }
 
       // Append image file if selected
-      const fileInput = document.getElementById("profileImage") as HTMLInputElement;
-      if (fileInput && fileInput.files && fileInput.files[0]) {
-        formPayload.append("profileImage", fileInput.files[0]);
+      if (hasNewFile) {
+        formPayload.append("profileImage", fileInput.files![0]);
       }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile/uploadProfile`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          // DO NOT add Content-Type manually for FormData
         },
         body: formPayload,
       });
 
       if (!res.ok) {
-        console.error("Failed to save profile:", res.statusText);
+        // Log the actual backend error details if it fails again
+        const errorDetails = await res.json().catch(async () => await res.text());
+        console.error("Failed to save profile:", res.status, errorDetails);
+        
+        // CHANGED: Use custom state instead of alert()
+        setErrorMsg(`Backend Error: Check console for details.`);
       } else {
         const data = await res.json();
-        alert("Profile saved");
+        // Optional: you can change this alert to a success message state too if you want
+        alert("Profile saved"); 
         console.log("Profile saved successfully:", data);
-        onCloseAction(); // Close modal after save
+
+        if (onSaveSuccess) onSaveSuccess();
+
+        onCloseAction();
       }
     } catch (err) {
       console.error("Error saving profile", err);
+      setErrorMsg("An unexpected error occurred while saving.");
     }
   };
-
 
   if (!isOpen) return null;
 
@@ -97,34 +134,40 @@ export default function ProfileModal({
 
         {/* Profile Picture Upload */}
         <div className="flex flex-col items-center mb-6">
-        <div className="relative w-24 h-24">
+          <div className="relative w-24 h-24">
             <img
-            src={
+              src={
                 profileImage ||
-                "https://cdn-icons-png.flaticon.com/512/847/847969.png" // default avatar
-            }
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+              }
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
             />
             <label
-            htmlFor="profileImage"
-            className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full cursor-pointer"
+              htmlFor="profileImage"
+              className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-1 rounded-full cursor-pointer"
             >
-            <Upload size={16} />
+              <Upload size={16} />
             </label>
             <input
-            type="file"
-            id="profileImage"
-            accept="image/*"
-            className="hidden"
-            onChange={handleImageChange}
+              type="file"
+              id="profileImage"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageChange}
             />
-        </div>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-            Upload your profile picture
-        </p>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+            Upload your profile picture <span className="text-red-500">*</span>
+          </p>
         </div>
 
+        {/* ADDED: Custom Error Message UI */}
+        {errorMsg && (
+          <div className="mb-6 p-3 bg-red-100/80 border border-red-300 text-red-700 rounded-lg text-sm dark:bg-red-900/30 dark:border-red-800 dark:text-red-400">
+            {errorMsg}
+          </div>
+        )}
 
         {/* Form Fields */}
         <div className="space-y-4">
@@ -132,13 +175,13 @@ export default function ProfileModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                Full Name
+                Full Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder="Name"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80"
@@ -146,13 +189,13 @@ export default function ProfileModal({
             </div>
             <div>
               <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                  setFormData({ ...formData, email: e.target.value })
                 }
                 placeholder="Email"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80"
@@ -167,10 +210,10 @@ export default function ProfileModal({
                 Phone
               </label>
               <input
-                type="number"
+                type="tel"
                 value={formData.phone}
                 onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
+                  setFormData({ ...formData, phone: e.target.value })
                 }
                 placeholder="Optional"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80"
@@ -178,13 +221,13 @@ export default function ProfileModal({
             </div>
             <div>
               <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                Location
+                Location <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
+                  setFormData({ ...formData, location: e.target.value })
                 }
                 placeholder="City, Country"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80"
@@ -198,78 +241,77 @@ export default function ProfileModal({
               Bio
             </label>
             <textarea
-                value={formData.Bio}
-                onChange={(e) =>
-                    setFormData({ ...formData, Bio: e.target.value })
-                }
-                placeholder="Optional"
-                rows={3}
-                onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = "auto"; // reset height
-                    target.style.height = `${target.scrollHeight}px`; // set to new height
-                }}
-                className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80 transition-all max-h-40 overflow-y-auto"
+              value={formData.Bio}
+              onChange={(e) =>
+                setFormData({ ...formData, Bio: e.target.value })
+              }
+              placeholder="Optional"
+              rows={3}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = "auto";
+                target.style.height = `${target.scrollHeight}px`;
+              }}
+              className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white/80 transition-all max-h-40 overflow-y-auto"
             ></textarea>
-
           </div>
 
           {/* URLs */}
           <div className="space-y-4">
             {/* LinkedIn */}
             <div>
-                <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                LinkedIn URL
-                </label>
-                <input
+              <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
+                LinkedIn URL <span className="text-red-500">*</span>
+              </label>
+              <input
                 type="text"
                 value={formData.linkedIn_URL}
                 onChange={(e) =>
-                    setFormData({ ...formData, linkedIn_URL: e.target.value })
+                  setFormData({ ...formData, linkedIn_URL: e.target.value })
                 }
                 placeholder="https://linkedin.com/in/your-profile"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 
                 dark:bg-gray-700 dark:text-white/80"
-                />
+              />
             </div>
 
             {/* GitHub */}
             <div>
-                <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                GitHub URL
-                </label>
-                <input
+              <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
+                GitHub URL <span className="text-red-500">*</span>
+              </label>
+              <input
                 type="text"
                 value={formData.gitHub_URL}
                 onChange={(e) =>
-                    setFormData({ ...formData, gitHub_URL: e.target.value })
+                  setFormData({ ...formData, gitHub_URL: e.target.value })
                 }
                 placeholder="https://github.com/your-username"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 
                 dark:bg-gray-700 dark:text-white/80"
-                />
+              />
             </div>
 
             {/* Portfolio */}
             <div>
-                <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
-                Portfolio URL
-                </label>
-                <input
+              <label className="font-medium text-gray-800 dark:text-white/90 mb-1 block">
+                Portfolio URL <span className="text-red-500">*</span>
+              </label>
+              <input
                 type="text"
                 value={formData.portfolio_URL}
                 onChange={(e) =>
-                    setFormData({ ...formData, portfolio_URL: e.target.value })
+                  setFormData({ ...formData, portfolio_URL: e.target.value })
                 }
                 placeholder="https://yourportfolio.com"
                 className="bg-gray-200/50 text-black rounded-lg px-4 py-2 w-full 
                 focus:outline-none focus:ring-2 focus:ring-blue-500 
                 dark:bg-gray-700 dark:text-white/80"
-                />
+              />
             </div>
-            </div>
+          </div>
 
           {/* Save Button */}
           <div className="pt-2 flex justify-end">
