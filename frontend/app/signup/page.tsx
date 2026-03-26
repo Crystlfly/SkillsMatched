@@ -105,8 +105,8 @@ export default function SignupPage() {
     ">
       <div className="absolute top-[3rem] left-[calc(50%-13.5rem)] 
                 text-gray-900 dark:text-gray-200 underline">
-        <a href="/" className="text-blue-900 dark:text-blue-100 underline ">
-          Back to Home
+        <a href="/login" className="text-blue-900 dark:text-blue-100 underline ">
+          Go to Login
         </a>
       </div>
       

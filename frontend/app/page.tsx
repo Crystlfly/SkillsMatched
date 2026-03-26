@@ -56,7 +56,9 @@ export default function Home() {
 
           </div>
           <p className="text-lg text-gray-200 mb-6 max-w-lg mt-4 text-center md:text-left">Join over 500,000 professionals who've found their dream jobs through our AI-powered platform. Get matched with opportunities that align with your goals.</p>
-          <button className="px-6 py-3 bg-white text-blue-800 font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200">Find Your Dream Job →</button>
+          <button
+          onClick={() => router.push("/login")}
+           className="px-6 py-3 bg-white text-blue-800 font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200">Find Your Dream Job →</button>
         </div>
         
         <div className="relative inline-block">
@@ -132,7 +134,7 @@ export default function Home() {
                 </div>
               </li>
             </ul>
-            <button className="px-6 py-3 mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200 backdrop-blur-md">
+            <button onClick={() => router.push("/login")} className="px-6 py-3 mt-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200 backdrop-blur-md">
               Try Matching →
             </button>
 
@@ -171,7 +173,7 @@ export default function Home() {
           className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200">
             Create Your Profile
           </button>
-          <button className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+          <button onClick={() => router.push("/login")} className="px-4 py-2 bg-white text-blue-600 font-semibold rounded-md transition-colors shadow-md hover:shadow-xl transform hover:scale-105 transition-all duration-200">
             Post a Job Opening
           </button>
         </div>
