@@ -46,7 +46,7 @@ router.get("/", authMiddleware, async (req, res) => {
     if (!pref || !pref.embedding || pref.embedding.length === 0) {
       return res
         .status(400)
-        .json({ message: "Job preference or its embedding not found" });
+        .json({ message: "Go to find Job and enter your job preference" });
     }
 
     const jobs = await prisma.job.findMany({
